@@ -61,8 +61,9 @@ function randomHex(len) {
 // Embeds secret "clientId" in the message, which is used
 // by the server to encrypt its response
 function encryptMessage(clientId, publicKey, message) {
+  const messageId = sha256sum(JSON.stringify(message))
   const data = new Buffer(JSON.stringify({
-    'msg_id': sha256sum(JSON.stringify(message)),
+    'msg_id': messageId,
     'client_id': clientId,
     'message': message
   }), 'utf8')
@@ -72,7 +73,7 @@ function encryptMessage(clientId, publicKey, message) {
 
   const key = crypto.publicEncrypt(publicKey, encryptionKey).toString('base64')
 
-  return key+':'+encryptedData
+  return { message_id: messageId, contents: key+':'+encryptedData }
 }
 
 // Possessing the private key decrypts the encrypted message

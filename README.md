@@ -9,7 +9,7 @@ Embed the library and use the below methods. For an example, see `example.js`, o
 
 **`encryptMessage(clientId, publicKey, message)`**
 
-Encrypts the message using the provided public key. Embeds secret `clientId` in the message, which is used by the server to encrypt its response.
+Encrypts the message using the provided public key. Embeds secret `clientId` in the message, which is used by the server to encrypt its response. Returns an object, with `contents` exposing the ciphertext, and `message_id` the generated internal message id.
 
 Example:
 ```javascript
@@ -19,7 +19,8 @@ let msg = ppc.encryptMessage(cid, pubkey, {
   redirect_to: "https://notes.skylark.ee/auth"
 })
 
-console.log("Encrypted message:", msg)
+console.log("Encrypted message:", msg.contents)
+console.log("Message ID:", msg.message_id)
 ```
 
 ---
@@ -32,7 +33,7 @@ Example:
 ```javascript
 const ppc = require("ppc-messaging")
 
-let decmsg = ppc.decryptMessage(privkey, msg)
+let decmsg = ppc.decryptMessage(privkey, ciphertext)
 
 console.log("Decrypted message:", decmsg)
 ```

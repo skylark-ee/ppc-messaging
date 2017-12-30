@@ -45,12 +45,13 @@ const sid = `RAoGASskTh5mTm2r:2zAq1BbEgX4KVqXykoAWIaeE3OJ2oTV`
 let msg = ppc.encryptMessage(cid, pubkey, {
   redirect_to: "https://notes.skylark.ee/auth"
 })
-console.log("Encrypted message:", msg)
+console.log("Encrypted message:", msg.contents)
+console.log("Message ID:", msg.message_id)
 
 
 // Decipher encrypted message on the server-side
 // using our private key
-let decmsg = ppc.decryptMessage(privkey, msg)
+let decmsg = ppc.decryptMessage(privkey, msg.contents)
 console.log("Decrypted message:", decmsg)
 
 
