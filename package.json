@@ -1,0 +1,23 @@
+{
+  "name": "ppc-messaging",
+  "version": "1.0.0",
+  "description": "Private-Public Crypto Messaging",
+  "main": "index.js",
+  "scripts": {
+    "generate-keys": "node -e \"console.log(JSON.stringify(require('keypair')()))\"",
+    "test": "node example.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/skylark-ee/ppc-messaging.git"
+  },
+  "author": "Flaki @ Skylark",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/skylark-ee/ppc-messaging/issues"
+  },
+  "homepage": "https://github.com/skylark-ee/ppc-messaging#readme",
+  "dependencies": {
+    "keypair": "^1.0.1"
+  }
+}
