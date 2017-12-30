@@ -5,6 +5,10 @@ const crypto = require('crypto')
 module.exports = {
   encryptMessage, decryptMessage,
   encryptResponse, decryptResponse,
+
+  aes256encrypt, aes256decrypt, sha256sum,
+
+  randomHex, randomString,
 }
 
 
