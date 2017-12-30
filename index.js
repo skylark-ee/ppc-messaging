@@ -15,6 +15,43 @@ function sha256sum(message) {
   return hash.digest('hex')
 }
 
+// Helper method for symmetric AES-256 encryption
+function aes256encrypt(key, message) {
+  const cipher = crypto.createCipher('aes256', key)
+
+  const result = Buffer.concat([
+    cipher.update(message, typeof message == 'string' ? 'utf8' : undefined),
+    cipher.final()
+  ]).toString('base64')
+
+  return result
+}
+
+// Helper method for symmetric AES-256 encryption
+function aes256decrypt(key, message) {
+  const cipher = crypto.createDecipher('aes256', key)
+
+  let result = Buffer.concat([
+    cipher.update(new Buffer(message, 'base64')),
+    cipher.final()
+  ]).toString('utf8')
+
+  return result
+}
+
+// Helper method for generating random strings
+function randomString(len) {
+  const digits = 32+len*len
+  return Array(digits).fill(1).map(i => Math.floor(Math.random()*36)).map(n => n.toString(36)).join('').substr(Math.random()*(digits-len),len)
+}
+
+// Helper method for generating random keys in hex
+function randomHex(len) {
+  const digits = 32+len*len
+  return Array(digits).fill(1).map(i => Math.floor(Math.random()*16)).map(n => n.toString(16)).join('').substr(Math.random()*(digits-len),len)
+}
+
+
 
 // Encrypts the message using the provided public key.
 // Embeds secret "clientId" in the message, which is used
@@ -25,40 +62,40 @@ function encryptMessage(clientId, publicKey, message) {
     'client_id': clientId,
     'message': message
   }), 'utf8')
-  const encrypted = crypto.publicEncrypt(publicKey, data)
 
-  return encrypted.toString('base64')
+  const encryptionKey = new Buffer(randomHex(64), 'hex')
+  const encryptedData = aes256encrypt(encryptionKey, data)
+
+  const key = crypto.publicEncrypt(publicKey, encryptionKey).toString('base64')
+
+  return key+':'+encryptedData
 }
 
 // Possessing the private key decrypts the encrypted message
 function decryptMessage(privateKey, message) {
-  const data = new Buffer(message, 'base64')
-  const decrypted = crypto.privateDecrypt(privateKey, data)
+  const parts = message.split(':')
 
-  return JSON.parse(decrypted.toString('utf8'))
+  const key = new Buffer(parts[0], 'base64')
+  const data = parts[1]
+
+  const decryptedkey = crypto.privateDecrypt(privateKey, key)
+
+  return JSON.parse(aes256decrypt(decryptedkey, data))
 }
 
 // Creates an encrypted response, in reply to the specified
 // message (id). It uses the supplied clientId to encrypt
 // the message.
 function encryptResponse(messageId, clientId, message) {
-  const cipher = crypto.createCipher('aes256', clientId)
-  const data = new Buffer(JSON.stringify({
-    reply_to: messageId,
-    message: message
-  }), 'utf8')
-
-  let result = cipher.update(data).toString('base64')
-  result += cipher.final('base64')
-  return result
+  return aes256encrypt(clientId,
+    JSON.stringify({
+      reply_to: messageId,
+      message: message
+    })
+  )
 }
 
 // Decrypts a received response using the supplied clientId
 function decryptResponse(clientId, message) {
-  const cipher = crypto.createDecipher('aes256', clientId)
-  const data = new Buffer(message, 'base64')
-
-  let result = cipher.update(data).toString('utf8')
-  result += cipher.final('utf8')
-  return JSON.parse(result)
+  return JSON.parse(aes256decrypt(clientId, message))
 }
